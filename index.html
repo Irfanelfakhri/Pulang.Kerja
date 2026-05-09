@@ -9,42 +9,58 @@
 
     <script>
         function jalankanRedirect() {
-            // --- CUSTOM JADWAL ---
-            const jamBuka = 18;   
-            const menitBuka = 40; 
-            
+            // --- BAGIAN YANG BISA ANDA EDIT ---
+            const jamBuka = 19;   
+            const menitBuka = 5; 
             const jamTutup = 8;   
             const menitTutup = 0; 
             // ----------------------------------
 
             const sekarang = new Date();
-            const jamAktual = sekarang.getHours();
-            const menitAktual = sekarang.getMinutes();
+            // Memastikan menggunakan zona waktu Jakarta (WIB)
+            const waktuWIB = new Date(sekarang.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
+            
+            const jamAktual = waktuWIB.getHours();
+            const menitAktual = waktuWIB.getMinutes();
             
             const waktuSekarang = (jamAktual * 60) + menitAktual;
             const jadwalBuka = (jamBuka * 60) + menitBuka;
             const jadwalTutup = (jamTutup * 60) + menitTutup;
 
-            // Format teks untuk tampilan di layar
             const formatWaktu = (h, m) => h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0');
-            
             const teksJamBuka = formatWaktu(jamBuka, menitBuka);
             const teksJamTutup = formatWaktu(jamTutup, menitTutup);
             const teksWaktuSekarang = formatWaktu(jamAktual, menitAktual);
 
             const statusDiv = document.getElementById('status');
 
-            // Logika pengecekan: Jika waktu sekarang berada di antara jam tutup dan jam buka
             if (waktuSekarang >= jadwalTutup && waktuSekarang < jadwalBuka) {
+                // TAMPILAN JIKA AKSES DITUTUP
                 statusDiv.innerHTML = `
                     <h2 style="color: #ff4d4d;">AKSES DITUTUP</h2>
                     <p>Waktu saat ini: <b>${teksWaktuSekarang}</b></p>
-                    <p>Jadwal akses ditutup: <b>${teksJamTutup} s/d ${teksJamBuka} WIB</b></p>
-                    <p>Silakan scan kembali mulai pukul <b>${teksJamBuka} WIB</b>.</p>
+                    <p>Jadwal tutup: <b>${teksJamTutup} s/d ${teksJamBuka} WIB</b></p>
+                    <p>Silakan scan kembali pukul <b>${teksJamBuka} WIB</b>.</p>
                 `;
             } else {
-                statusDiv.innerHTML = "<h2>WAKTU SESUAI</h2><p>Membuka Mobile Legends...</p>";
-                window.location.href = "mobilelegends://app";
+                // TAMPILAN JIKA AKSES DIBUKA DENGAN COUNTDOWN
+                let hitungan = 3;
+                
+                const interval = setInterval(function() {
+                    statusDiv.innerHTML = `
+                        <h2 style="color: #4CAF50;">WAKTU SESUAI</h2>
+                        <p>Membuka Mobile Legends dalam...</p>
+                        <h1 style="font-size: 80px; margin: 10px 0;">${hitungan}</h1>
+                    `;
+                    
+                    if (hitungan <= 0) {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = "<h2>Membuka Aplikasi...</h2>";
+                        window.location.href = "mobilelegends://app";
+                    }
+                    
+                    hitungan--;
+                }, 1000); // Berjalan setiap 1 detik (1000ms)
             }
         }
 
